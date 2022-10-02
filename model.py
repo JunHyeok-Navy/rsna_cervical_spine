@@ -5,10 +5,10 @@ import config
 class EffnetModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.effnet = timm.create_model(config.MODEL_NAME)
+        self.effnet = timm.create_model(config.MODEL_NAME, in_chans=1)
 
         self.nn_fracture = torch.nn.Sequential(
-            torch.nn.Linear(1000, 7),
+            torch.nn.Linear(1000, 8),
         )
         self.nn_vertebrae = torch.nn.Sequential(
             torch.nn.Linear(1000, 7),

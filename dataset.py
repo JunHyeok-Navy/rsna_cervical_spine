@@ -41,7 +41,6 @@ class RSNADataset(data.Dataset):
 
         try:
             img = load_dicom(path)[0]
-            img = np.expand_dims(img, axis=0)
             if self.transforms is not None:
                 img = self.transforms(image=img)['image']
         except Exception as ex:
@@ -49,11 +48,11 @@ class RSNADataset(data.Dataset):
             return None
 
         if 'C1_fracture' in self.df:
-            frac_targets = torch.as_tensor(self.df.iloc[i][['C1_fracture', 'C2_fracture', 'C3_fracture', 'C4_fracture',
+            frac_targets = torch.as_tensor(self.df.iloc[i][['patient_overall', 'C1_fracture', 'C2_fracture', 'C3_fracture', 'C4_fracture',
                                                             'C5_fracture', 'C6_fracture', 'C7_fracture']].astype(
                 'float32').values)
             vert_targets = torch.as_tensor(
                 self.df.iloc[i][['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7']].astype('float32').values)
-            frac_targets = frac_targets * vert_targets
+            frac_targets[1:] = frac_targets[1:] * vert_targets
             return img, frac_targets, vert_targets
         return img

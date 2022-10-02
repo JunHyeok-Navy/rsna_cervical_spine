@@ -2,6 +2,7 @@ import loss
 import model
 import config
 import dataset
+import warnings
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -12,17 +13,20 @@ import torch.optim.lr_scheduler as lr_scheduler
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+warnings.filterwarnings(action='ignore')
+DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Data for training
 df = pd.read_csv('C:/Users/user/Desktop/deep-learning/cervical/cervical_repo/2d_train_data.csv')
 
 # Model
 eff_model = model.EffnetModel()
+eff_model.cuda()
 
 # Augmentation
 train_transform = A.Compose([
-    A.Resize(1, config.IMAGE_SIZE[0], config.IMAGE_SIZE[1]),
+    A.Resize(*config.IMAGE_SIZE),
     A.HorizontalFlip(p=0.5),
     A.ShiftScaleRotate(
         shift_limit=0.0625, 
@@ -34,7 +38,7 @@ train_transform = A.Compose([
     ToTensorV2()
     ])
 valid_transform = A.Compose([
-    A.Resize(1, config.IMAGE_SIZE[0], config.IMAGE_SIZE[1]),
+    A.Resize(*config.IMAGE_SIZE),
     ToTensorV2()
     ])
 
@@ -86,12 +90,12 @@ for fold in range(config.N_FOLDS):
 
                 # Forward pass
                 y_frac_pred, y_vert_pred = eff_model(imgs)
-                frac_loss = loss.weighted_loss(y_frac_pred, y_frac, reduction='None', verbose=False)
+                frac_loss = loss.weighted_loss(y_frac_pred, y_frac, verbose=False)
                 vert_loss = torch.nn.functional.binary_cross_entropy_with_logits(y_vert_pred, y_vert)
                 L = config.FRAC_LOSS_WEIGHT * frac_loss + vert_loss
 
                 # Backprop
-                L.backward()
+                L.mean().backward()
 
                 # Update parameters
                 optimizer.step()
@@ -100,7 +104,7 @@ for fold in range(config.N_FOLDS):
                 optimizer.zero_grad()
 
                 # Track loss
-                loss_acc += frac_loss.detach().item()
+                loss_acc += frac_loss.item()
                 train_count += 1
                 tepoch.set_postfix(loss=loss_acc/train_count)
         
@@ -118,7 +122,7 @@ for fold in range(config.N_FOLDS):
 
                 # Forward pass
                 val_frac_pred, val_vert_pred = eff_model(val_imgs)
-                val_frac_loss = loss.weighted_loss(val_frac_pred, val_y_frac, reduction='None', verbose=False)
+                val_frac_loss = loss.weighted_loss(val_frac_pred, val_y_frac, verbose=False)
                 val_vert_loss = torch.nn.functional.binary_cross_entropy_with_logits(val_y_vert, val_y_vert)
                 val_loss = config.FRAC_LOSS_WEIGHT * val_frac_loss + val_vert_loss
 
