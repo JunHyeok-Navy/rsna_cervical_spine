@@ -5,7 +5,7 @@ import config
 class EffnetModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.effnet = timm.create_model(config.MODEL_NAME, in_chans=1)
+        self.effnet = timm.create_model(config.MODEL_NAME, pretrained=True, in_chans=1)
 
         self.nn_fracture = torch.nn.Sequential(
             torch.nn.Linear(1000, 8),
