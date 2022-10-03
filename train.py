@@ -64,8 +64,8 @@ def train():
         # DataLoader
         train_data = dataset.RSNADataset(df_train, config.TRAIN_IMAGE_PATH, transforms=train_transform)
         valid_data = dataset.RSNADataset(df_valid, config.TRAIN_IMAGE_PATH, transforms=valid_transform)
-        train_loader = torch.utils.data.DataLoader(train_data, batch_size=config.BATCH_SIZE, shuffle=True, pin_memory=True, num_workers=config.NUMWORKERS)
-        valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=config.BATCH_SIZE, shuffle=False, pin_memory=True, num_workers=config.NUMWORKERS)
+        train_loader = torch.utils.data.DataLoader(train_data, batch_size=config.BATCH_SIZE, shuffle=True, pin_memory=True, num_workers=config.NUM_WORKERS)
+        valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=config.BATCH_SIZE, shuffle=False, pin_memory=True, num_workers=config.NUM_WORKERS)
 
         print(f'--------- Fold {fold} Training Start!! ---------')
 
