@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+import timm
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
@@ -19,10 +20,11 @@ warnings.filterwarnings(action='ignore')
 DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Data for training
-df = pd.read_csv('C:/Users/user/Desktop/deep-learning/cervical/cervical_repo/2d_train_data.csv')
+df = pd.read_csv('C:/Users/user/Desktop/deep-learning/cervical/cervical_repo/group_shuffled_2d_df.csv')
 
 # Model
-eff_model = model.EffnetModel()
+backbone = timm.create_model(config.MODEL_NAME, pretrained=True, in_chans=1)
+eff_model = model.EffnetModel(model=backbone)
 eff_model.cuda()
 
 # Augmentation
@@ -64,7 +66,7 @@ def train():
         # DataLoader
         train_data = dataset.RSNADataset(df_train, config.TRAIN_IMAGE_PATH, transforms=train_transform)
         valid_data = dataset.RSNADataset(df_valid, config.TRAIN_IMAGE_PATH, transforms=valid_transform)
-        train_loader = torch.utils.data.DataLoader(train_data, batch_size=config.BATCH_SIZE, shuffle=True, pin_memory=True, num_workers=config.NUM_WORKERS)
+        train_loader = torch.utils.data.DataLoader(train_data, batch_size=config.BATCH_SIZE, shuffle=False, pin_memory=True, num_workers=config.NUM_WORKERS)
         valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=config.BATCH_SIZE, shuffle=False, pin_memory=True, num_workers=config.NUM_WORKERS)
 
         print(f'--------- Fold {fold} Training Start!! ---------')

@@ -55,4 +55,5 @@ class RSNADataset(data.Dataset):
                 self.df.iloc[i][['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7']].astype('float32').values)
             frac_targets = frac_targets * vert_targets
             return img, frac_targets, vert_targets
+        print(img.shape)
         return img
