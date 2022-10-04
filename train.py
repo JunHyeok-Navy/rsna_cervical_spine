@@ -25,7 +25,7 @@ df = pd.read_csv('C:/Users/user/Desktop/deep-learning/cervical/cervical_repo/gro
 # Model
 backbone = timm.create_model(config.MODEL_NAME, pretrained=True, in_chans=1)
 eff_model = model.EffnetModel(model=backbone)
-eff_model.cuda()
+eff_model.to(DEVICE)
 
 # Augmentation
 train_transform = A.Compose([
